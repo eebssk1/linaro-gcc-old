@@ -1,5 +1,5 @@
 /* LTO symbol table.
-   Copyright (C) 2009-2017 Free Software Foundation, Inc.
+   Copyright (C) 2009-2018 Free Software Foundation, Inc.
    Contributed by CodeSourcery, Inc.
 
 This file is part of GCC.
@@ -32,6 +32,8 @@ along with GCC; see the file COPYING3.  If not see
 #include "builtins.h"
 #include "alias.h"
 #include "lto-symtab.h"
+#include "stringpool.h"
+#include "attribs.h"
 
 /* Replace the cgraph node NODE with PREVAILING_NODE in the cgraph, merging
    all edges and removing the old node.  */
@@ -45,11 +47,10 @@ lto_cgraph_replace_node (struct cgraph_node *node,
 
   if (symtab->dump_file)
     {
-      fprintf (symtab->dump_file, "Replacing cgraph node %s/%i by %s/%i"
+      fprintf (symtab->dump_file, "Replacing cgraph node %s by %s"
  	       " for symbol %s\n",
-	       node->name (), node->order,
-	       prevailing_node->name (),
-	       prevailing_node->order,
+	       node->dump_name (),
+	       prevailing_node->dump_name (),
 	       IDENTIFIER_POINTER ((*targetm.asm_out.mangle_assembler_name)
 		 (IDENTIFIER_POINTER (DECL_ASSEMBLER_NAME (node->decl)))));
     }
@@ -387,8 +388,9 @@ lto_symtab_merge (symtab_node *prevailing, symtab_node *entry)
 	 int a[]={1,2,3};
 	 here the first declaration is COMMON
 	 and sizeof(a) == sizeof (int).  */
-	else if (TREE_CODE (type) == ARRAY_TYPE)
-	  return (TYPE_SIZE (decl) == TYPE_SIZE (TREE_TYPE (type)));
+	else if (TREE_CODE (type) != ARRAY_TYPE
+		 || (TYPE_SIZE (type) != TYPE_SIZE (TREE_TYPE (type))))
+	  return false;
       }
 
   return true;
@@ -584,9 +586,7 @@ lto_symtab_merge_p (tree prevailing, tree decl)
       tree prev_attr = lookup_attribute ("error", DECL_ATTRIBUTES (prevailing));
       tree attr = lookup_attribute ("error", DECL_ATTRIBUTES (decl));
       if ((prev_attr == NULL) != (attr == NULL)
-	  || (prev_attr
-	      && TREE_VALUE (TREE_VALUE (prev_attr))
-		 != TREE_VALUE (TREE_VALUE (attr))))
+	  || (prev_attr && !attribute_value_equal (prev_attr, attr)))
 	{
           if (symtab->dump_file)
 	    fprintf (symtab->dump_file, "Not merging decls; "
@@ -597,9 +597,7 @@ lto_symtab_merge_p (tree prevailing, tree decl)
       prev_attr = lookup_attribute ("warning", DECL_ATTRIBUTES (prevailing));
       attr = lookup_attribute ("warning", DECL_ATTRIBUTES (decl));
       if ((prev_attr == NULL) != (attr == NULL)
-	  || (prev_attr
-	      && TREE_VALUE (TREE_VALUE (prev_attr))
-		 != TREE_VALUE (TREE_VALUE (attr))))
+	  || (prev_attr && !attribute_value_equal (prev_attr, attr)))
 	{
           if (symtab->dump_file)
 	    fprintf (symtab->dump_file, "Not merging decls; "

@@ -1,5 +1,5 @@
 /* Configuration file for Linux Android targets.
-   Copyright (C) 2008-2017 Free Software Foundation, Inc.
+   Copyright (C) 2008-2018 Free Software Foundation, Inc.
    Contributed by Doug Kwan (dougkwan@google.com)
    Rewritten by CodeSourcery, Inc.
 
@@ -40,9 +40,9 @@
 #define ANDROID_LINK_SPEC \
   "%{shared: -Bsymbolic}"
 
-#define ANDROID_CC1_SPEC(ANDROID_PIC_DEFAULT)						\
+#define ANDROID_CC1_SPEC						\
   "%{!mglibc:%{!muclibc:%{!mbionic: -mbionic}}} "			\
-  "%{!fno-pic:%{!fno-PIC:%{!fpic:%{!fPIC: " ANDROID_PIC_DEFAULT "}}}}"
+  "%{!fno-pic:%{!fno-PIC:%{!fpic:%{!fPIC: -fPIC}}}}"
 
 #define ANDROID_CC1PLUS_SPEC						\
   "%{!fexceptions:%{!fno-exceptions: -fno-exceptions}} "		\

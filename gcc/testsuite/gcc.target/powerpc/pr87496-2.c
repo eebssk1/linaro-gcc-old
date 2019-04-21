@@ -7,4 +7,3 @@
 int i;
 
 /* { dg-error "'-mabi=ieeelongdouble' requires '-mlong-double-128'" "PR87496" { target *-*-* } 0 } */
-/* { dg-warning "using IEEE extended precision long double" "" { target *-*-* } 0 } */

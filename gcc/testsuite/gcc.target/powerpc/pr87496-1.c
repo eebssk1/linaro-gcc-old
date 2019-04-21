@@ -8,4 +8,3 @@
 int i;
 
 /* { dg-error "'-mabi=ieeelongdouble' requires full ISA 2.06 support" "PR87496" { target *-*-* } 0 } */
-/* { dg-warning "using IEEE extended precision long double" "" { target *-*-* } 0 } */

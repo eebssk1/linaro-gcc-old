@@ -1,5 +1,5 @@
 /* Array prefetching.
-   Copyright (C) 2005-2017 Free Software Foundation, Inc.
+   Copyright (C) 2005-2018 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -291,7 +291,7 @@ dump_mem_details (FILE *file, tree base, tree step,
   if (cst_and_fits_in_hwi (step))
     fprintf (file, HOST_WIDE_INT_PRINT_DEC, int_cst_value (step));
   else
-    print_generic_expr (file, step, TDF_TREE);
+    print_generic_expr (file, step, TDF_SLIM);
   fprintf (file, ")\n");
   fprintf (file, "  delta " HOST_WIDE_INT_PRINT_DEC "\n", delta);
   fprintf (file, "  %s\n\n", write_p ? "write" : "read");
@@ -564,8 +564,8 @@ gather_memory_references_ref (struct loop *loop, struct mem_ref_group **refs,
           if (dump_file && (dump_flags & TDF_DETAILS))
             {
               fprintf (dump_file, "Memory expression %p\n",(void *) ref ); 
-              print_generic_expr (dump_file, ref, TDF_TREE); 
-              fprintf (dump_file,":");
+	      print_generic_expr (dump_file, ref, TDF_SLIM);
+	      fprintf (dump_file,":");
               dump_mem_details (dump_file, base, step, delta, write_p);
               fprintf (dump_file, 
                        "Ignoring %p, non-constant step prefetching is "
@@ -581,7 +581,7 @@ gather_memory_references_ref (struct loop *loop, struct mem_ref_group **refs,
             if (dump_file && (dump_flags & TDF_DETAILS))
               {
                 fprintf (dump_file, "Memory expression %p\n",(void *) ref );
-                print_generic_expr (dump_file, ref, TDF_TREE);
+		print_generic_expr (dump_file, ref, TDF_SLIM);
                 fprintf (dump_file,":");
                 dump_mem_details (dump_file, base, step, delta, write_p);
                 fprintf (dump_file, 
@@ -1632,8 +1632,9 @@ determine_loop_nest_reuse (struct loop *loop, struct mem_ref_group *refs,
   for (gr = refs; gr; gr = gr->next)
     for (ref = gr->refs; ref; ref = ref->next)
       {
-	dr = create_data_ref (nest, loop_containing_stmt (ref->stmt),
-			      ref->mem, ref->stmt, !ref->write_p);
+	dr = create_data_ref (loop_preheader_edge (nest),
+			      loop_containing_stmt (ref->stmt),
+			      ref->mem, ref->stmt, !ref->write_p, false);
 
 	if (dr)
 	  {
@@ -1668,6 +1669,7 @@ determine_loop_nest_reuse (struct loop *loop, struct mem_ref_group *refs,
       refb = (struct mem_ref *) DDR_B (dep)->aux;
 
       if (DDR_ARE_DEPENDENT (dep) == chrec_dont_know
+	  || DDR_COULD_BE_INDEPENDENT_P (dep)
 	  || DDR_NUM_DIST_VECTS (dep) == 0)
 	{
 	  /* If the dependence cannot be analyzed, assume that there might be
