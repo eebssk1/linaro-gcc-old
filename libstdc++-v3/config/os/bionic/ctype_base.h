@@ -38,6 +38,17 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
     // Non-standard typedefs.
     typedef const int* 		__to_type;
 
+
+    //ANDK Compatibility
+    #define _U _CTYPE_U
+    #define _L _CTYPE_L
+    #define _N _CTYPE_N
+    #define _X _CTYPE_X
+    #define _S _CTYPE_S
+    #define _P _CTYPE_P
+    #define _B _CTYPE_B
+    #define _C _CTYPE_C
+
     // NB: Offsets into ctype<char>::_M_table force a particular size
     // on the mask type. Because of this, we don't use an enum.
     typedef char 		mask;
